@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Idea Evaluator</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f4f6fb; color: #1c2230;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1 { font-size: 26px; margin: 0 0 2px; color: #1f3864; letter-spacing: -.2px; }
+  .sub { color: #667085; font-size: 14px; margin: 0 0 22px; }
+  .card { background: #fff; border: 1px solid #e4e8f0; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+  .composer { padding: 18px; margin-bottom: 22px; }
+  textarea {
+    width: 100%; min-height: 92px; resize: vertical; padding: 12px 14px;
+    border: 1px solid #d5dbe6; border-radius: 10px; font: inherit; color: inherit;
+    background: #fbfcfe; outline: none;
+  }
+  textarea:focus { border-color: #1f3864; background: #fff; }
+  .row { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  button {
+    background: #1f3864; color: #fff; border: 0; padding: 11px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+  }
+  button:hover { background: #2a4a80; }
+  button:disabled { background: #9aa6bd; cursor: default; }
+  .hint { color: #8a93a6; font-size: 12.5px; }
+  .ghost { background: #eef1f7; color: #33405c; }
+  .ghost:hover { background: #e3e8f2; }
+
+  .badge { display: inline-block; padding: 5px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; letter-spacing: .3px; }
+  .GO { background: #e5f4ea; color: #1a7f37; border: 1px solid #a9d9ba; }
+  .REWORK { background: #fdf3e2; color: #a15c07; border: 1px solid #eccf98; }
+  .KILL { background: #fdeceb; color: #b42318; border: 1px solid #eeb1ac; }
+
+  .result { padding: 22px; margin-bottom: 20px; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+  .result h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .6px; color: #667085; margin: 0 0 10px; }
+  .idea-stmt { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .assum { color: #667085; font-size: 13.5px; margin: 0 0 16px; }
+  .verdline { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+  .composite { font-size: 15px; }
+  .composite b { font-size: 22px; color: #1f3864; }
+  .reason { margin: 8px 0 4px; }
+  .conv { background: #f6f8fc; border-left: 3px solid #1f3864; padding: 10px 14px; border-radius: 6px; font-size: 14px; margin: 14px 0 4px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 8px; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #eef1f6; }
+  th { background: #1f3864; color: #fff; font-weight: 600; }
+  th:nth-child(2), td:nth-child(2) { text-align: center; width: 84px; }
+  tr:last-child td { border-bottom: 0; }
+  .scorepill { display:inline-block; min-width: 30px; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+
+  .roles { display: grid; gap: 12px; margin-top: 14px; }
+  .role { border: 1px solid #e7ebf3; border-radius: 10px; padding: 14px 16px; }
+  .role .rh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .role .rh strong { font-size: 14.5px; color: #1f3864; }
+  .role p { margin: 6px 0 0; font-size: 13.6px; color: #2b3446; }
+  .role .rv { margin-top: 8px; font-size: 13px; font-style: italic; color: #55607a; }
+  .recs { margin: 14px 0 0; padding-left: 20px; }
+  .recs li { margin: 5px 0; font-size: 13.8px; }
+
+  .loading { padding: 26px; text-align: center; color: #667085; }
+  .spinner { width: 22px; height: 22px; border: 3px solid #d9e0ee; border-top-color: #1f3864; border-radius: 50%; display: inline-block; animation: spin 1s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .err { color: #b42318; background: #fdeceb; border: 1px solid #eeb1ac; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; }
+
+  .history h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: #8a93a6; margin: 26px 0 8px; }
+  .hitem { display:flex; justify-content: space-between; gap: 12px; align-items:center; padding: 10px 14px; border:1px solid #e7ebf3; border-radius: 10px; background:#fff; margin-bottom: 8px; cursor: pointer; }
+  .hitem:hover { border-color: #c3ccdd; }
+  .hitem .ht { font-size: 13.6px; color:#2b3446; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hitem .hmeta { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .foot { color:#9aa6bd; font-size:12px; text-align:center; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Business Idea Evaluator</h1>
+  <p class="sub">Paste a business idea. A four-role panel — Market · Pricing · Positioning · Revenue — scores it and calls GO / REWORK / KILL, right here on screen.</p>
+
+  <div class="card composer">
+    <textarea id="idea" placeholder="e.g. A subscription box that delivers locally-roasted coffee to offices, with a dashboard for the office manager to manage everyone's preferences."></textarea>
+    <div class="row">
+      <button id="go">Evaluate idea</button>
+      <button id="clear" class="ghost">Clear</button>
+      <span class="hint">Runs a quick panel in-app. For the deep, web-researched version with a Word report, ask in chat.</span>
+    </div>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="history" id="historyWrap" style="display:none">
+    <h2>Recent evaluations</h2>
+    <div id="history"></div>
+  </div>
+
+  <div class="foot">Scores: 8–10 strong · 5–7 workable with caveats · 1–4 weak / likely killer. In-app panel uses fast inference and no live web search.</div>
+</div>
+
+<script>
+const KEY = "idea_evaluator_history_v1";
+const out = document.getElementById("out");
+const ideaEl = document.getElementById("idea");
+const goBtn = document.getElementById("go");
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(e){ return []; }
+}
+function saveHistory(h) { try { localStorage.setItem(KEY, JSON.stringify(h.slice(0,12))); } catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function scoreColor(n){
+  n = Number(n)||0;
+  if (n >= 8) return {bg:"#e5f4ea", fg:"#1a7f37"};
+  if (n >= 5) return {bg:"#fdf3e2", fg:"#a15c07"};
+  return {bg:"#fdeceb", fg:"#b42318"};
+}
+
+function render(ev) {
+  const call = (ev.call||"REWORK").toUpperCase();
+  const roles = ev.roles || [];
+  const scoreRows = roles.map(r => {
+    const c = scoreColor(r.score);
+    return `<tr><td>${esc(r.name)}</td>
+      <td><span class="scorepill" style="background:${c.bg};color:${c.fg}">${esc(r.score)}</span></td>
+      <td>${esc(r.verdict)}</td></tr>`;
+  }).join("");
+  const roleCards = roles.map(r => {
+    const c = scoreColor(r.score);
+    return `<div class="role">
+      <div class="rh"><strong>${esc(r.name)}</strong>
+        <span class="scorepill" style="background:${c.bg};color:${c.fg}">${esc(r.score)}/10</span></div>
+      <p>${esc(r.analysis)}</p>
+      <div class="rv">${esc(r.verdict)}</div>
+    </div>`;
+  }).join("");
+  const recs = (ev.recommendation||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+
+  out.innerHTML = `<div class="card result">
+    <h2>Verdict</h2>
+    <p class="idea-stmt">${esc(ev.idea)}</p>
+    ${ev.assumptions?`<p class="assum">Assumptions: ${esc(ev.assumptions)}</p>`:""}
+    <div class="verdline">
+      <span class="badge ${call}">${call}</span>
+      <span class="composite">Composite <b>${esc(ev.composite)}</b> / 10</span>
+    </div>
+    <p class="reason">${esc(ev.reasoning)}</p>
+    ${ev.convergence?`<div class="conv"><strong>Convergence:</strong> ${esc(ev.convergence)}</div>`:""}
+    <table><thead><tr><th>Dimension</th><th>Score</th><th>One-line verdict</th></tr></thead>
+      <tbody>${scoreRows}</tbody></table>
+    <div class="roles">${roleCards}</div>
+    ${recs?`<h2 style="margin-top:18px">Recommendation</h2><ul class="recs">${recs}</ul>`:""}
+  </div>`;
+  out.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderHistory() {
+  const h = loadHistory();
+  const wrap = document.getElementById("historyWrap");
+  const list = document.getElementById("history");
+  if (!h.length) { wrap.style.display="none"; return; }
+  wrap.style.display="block";
+  list.innerHTML = h.map((ev,i)=>{
+    const call=(ev.call||"REWORK").toUpperCase();
+    return `<div class="hitem" data-i="${i}">
+      <span class="ht">${esc(ev.idea)}</span>
+      <span class="hmeta"><span class="composite">${esc(ev.composite)}</span>
+      <span class="badge ${call}" style="font-size:12px;padding:3px 10px">${call}</span></span></div>`;
+  }).join("");
+  [...list.querySelectorAll(".hitem")].forEach(el=>{
+    el.onclick=()=>{ render(loadHistory()[+el.dataset.i]); };
+  });
+}
+
+function extractJSON(raw) {
+  if (raw == null) return null;
+  if (typeof raw === "object") {
+    // askClaude may return an object with the text somewhere
+    raw = raw.text || raw.content || raw.response || raw.output || raw.completion || JSON.stringify(raw);
+  }
+  let s = String(raw).trim();
+  s = s.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a>=0 && b>a) s = s.slice(a, b+1);
+  return JSON.parse(s);
+}
+
+const PROMPT = (idea) => `You are the Orchestrator of a business-idea evaluation panel. Evaluate the idea below through four specialist roles, each judging ONLY its own dimension and giving an integer score 1-10:
+- Market: demand (real/recurring vs fad), competition, timing, size.
+- Pricing: price the market bears, sensitivity, a concrete tier idea, margin room.
+- Positioning: differentiation vs incumbents, moat/switching cost, sharpest wedge, biggest risk.
+- Revenue: revenue-model shape, unit economics, the cost line that decides profitability, path to first revenue, churn.
+Then synthesize: composite = average of the four (one decimal), a call of GO, REWORK, or KILL with one-line reasoning, a convergence point (a shared risk/lever multiple roles flagged), and if REWORK/KILL a short list of specific changes that move it toward GO.
+Be specific, quantitative, and honest — not a cheerleader. Infer obvious context and state brief assumptions.
+
+Return ONLY valid minified JSON, no markdown, with this exact shape:
+{"idea":"<one-sentence restatement>","assumptions":"<short>","composite":<number>,"call":"GO|REWORK|KILL","reasoning":"<one line>","convergence":"<one line>","roles":[{"name":"Market","score":<int>,"analysis":"<2-3 sentences with numbers>","verdict":"<one line>"},{"name":"Pricing","score":<int>,"analysis":"...","verdict":"..."},{"name":"Positioning","score":<int>,"analysis":"...","verdict":"..."},{"name":"Revenue","score":<int>,"analysis":"...","verdict":"..."}],"recommendation":["<change 1>","<change 2>"]}
+
+IDEA: ${idea}`;
+
+async function evaluate() {
+  const idea = ideaEl.value.trim();
+  if (!idea) { ideaEl.focus(); return; }
+  if (!(window.cowork && typeof window.cowork.askClaude === "function")) {
+    out.innerHTML = `<div class="card result"><div class="err">This page needs to run inside Cowork to evaluate ideas live. Open it from the Cowork sidebar, or paste the idea into chat for a full web-researched evaluation.</div></div>`;
+    return;
+  }
+  goBtn.disabled = true; goBtn.textContent = "Evaluating…";
+  out.innerHTML = `<div class="card loading"><span class="spinner"></span>Running the four-role panel…</div>`;
+  try {
+    const resp = await window.cowork.askClaude(PROMPT(idea), []);
+    const ev = extractJSON(resp);
+    if (!ev || !ev.roles) throw new Error("Could not parse the evaluation.");
+    ev.idea = ev.idea || idea;
+    render(ev);
+    const h = loadHistory(); h.unshift(ev); saveHistory(h); renderHistory();
+  } catch (e) {
+    out.innerHTML = `<div class="card result"><div class="err">Sorry — the evaluation couldn't be generated (${esc(e.message)}). Try rephrasing the idea, or ask in chat for the full panel.</div></div>`;
+  } finally {
+    goBtn.disabled = false; goBtn.textContent = "Evaluate idea";
+  }
+}
+
+goBtn.onclick = evaluate;
+document.getElementById("clear").onclick = ()=>{ ideaEl.value=""; out.innerHTML=""; ideaEl.focus(); };
+ideaEl.addEventListener("keydown", e=>{ if((e.metaKey||e.ctrlKey)&&e.key==="Enter") evaluate(); });
+renderHistory();
+</script>
+</body>
+</html>

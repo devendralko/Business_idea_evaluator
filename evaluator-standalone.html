@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Idea Evaluator</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f4f6fb; color: #1c2230; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 26px 20px 60px; }
+  h1 { font-size: 26px; margin: 0 0 2px; color: #1f3864; }
+  .sub { color: #667085; font-size: 14px; margin: 0 0 20px; }
+  .card { background: #fff; border: 1px solid #e4e8f0; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); padding: 18px; margin-bottom: 18px; }
+  label { display:block; font-size: 12.5px; font-weight:600; color:#55607a; margin-bottom:6px; }
+  input[type=password], input[type=text], textarea { width: 100%; padding: 11px 13px; border: 1px solid #d5dbe6; border-radius: 10px; font: inherit; color: inherit; background: #fbfcfe; outline: none; }
+  textarea { min-height: 92px; resize: vertical; }
+  input:focus, textarea:focus { border-color: #1f3864; background: #fff; }
+  .keyrow { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  .keyrow > div { flex: 1 1 320px; }
+  .row { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  button { background: #1f3864; color: #fff; border: 0; padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  button:hover { background: #2a4a80; }
+  button:disabled { background: #9aa6bd; cursor: default; }
+  .ghost { background: #eef1f7; color: #33405c; }
+  .ghost:hover { background: #e3e8f2; }
+  .hint { color: #8a93a6; font-size: 12.5px; }
+  .ok { color:#1a7f37; font-size:12.5px; font-weight:600; }
+  .badge { display: inline-block; padding: 5px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .GO { background: #e5f4ea; color: #1a7f37; } .REWORK { background: #fdf3e2; color: #a15c07; } .KILL { background: #fdeceb; color: #b42318; }
+  .result { animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none;} }
+  .idea-stmt { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .assum { color: #667085; font-size: 13.5px; margin: 0 0 14px; }
+  .verdline { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+  .composite b { font-size: 22px; color: #1f3864; }
+  .conv { background: #f6f8fc; border-left: 3px solid #1f3864; padding: 10px 14px; border-radius: 6px; font-size: 14px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #eef1f6; }
+  th { background: #1f3864; color: #fff; }
+  th:nth-child(2), td:nth-child(2) { text-align: center; width: 78px; }
+  .pill { display:inline-block; min-width: 30px; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+  .role { border: 1px solid #e7ebf3; border-radius: 10px; padding: 14px 16px; margin-top: 10px; }
+  .rh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+  .rh b { color: #1f3864; }
+  .role p { margin: 5px 0 0; font-size: 13.6px; color: #2b3446; }
+  .rv { margin-top: 7px; font-size: 13px; font-style: italic; color: #55607a; }
+  .recs li { margin: 5px 0; font-size: 13.8px; }
+  .err { color: #b42318; background: #fdeceb; border: 1px solid #eeb1ac; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; }
+  .spin { width: 20px; height: 20px; border: 3px solid #d9e0ee; border-top-color: #1f3864; border-radius: 50%; display: inline-block; animation: sp 1s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .hist h2 { font-size: 13px; text-transform: uppercase; letter-spacing:.6px; color:#8a93a6; margin: 22px 0 8px; }
+  .hitem { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:10px 14px; border:1px solid #e7ebf3; border-radius:10px; background:#fff; margin-bottom:8px; cursor:pointer; }
+  .hitem:hover { border-color:#c3ccdd; }
+  .hitem .ht { font-size:13.6px; color:#2b3446; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .foot { color:#9aa6bd; font-size:12px; text-align:center; margin-top:26px; }
+  details { margin-top: 8px; } summary { cursor: pointer; color:#667085; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Business Idea Evaluator</h1>
+  <p class="sub">Paste a business idea. A four-role panel — Market · Pricing · Positioning · Revenue — scores it and calls GO / REWORK / KILL, right here on screen.</p>
+
+  <div class="card">
+    <div class="keyrow">
+      <div>
+        <label for="key">OpenRouter API key (stored only in this browser)</label>
+        <input type="password" id="key" placeholder="sk-or-...">
+      </div>
+      <button id="savekey">Save key</button>
+      <span id="keystatus" class="hint"></span>
+    </div>
+    <div style="margin-top:12px">
+      <label for="model">Model (OpenRouter model ID)</label>
+      <input type="text" id="model" placeholder="openai/gpt-4o-mini">
+    </div>
+    <details>
+      <summary>Where do I get a key? &amp; is it safe?</summary>
+      <p class="hint" style="margin:8px 0 0">Create a key at openrouter.ai/keys. It's saved only in your browser's local storage on this device and sent directly to OpenRouter — never to anyone else. Set the model to any OpenRouter model ID, e.g. <code>openai/gpt-4o-mini</code>, <code>anthropic/claude-3.5-haiku</code>, or <code>google/gemini-flash-1.5</code>. The fields are per-browser, so a fresh copy has no key.</p>
+    </details>
+  </div>
+
+  <div class="card">
+    <label for="idea">Business idea</label>
+    <textarea id="idea" placeholder="e.g. A subscription box that delivers locally-roasted coffee to offices, with a dashboard for the office manager to manage everyone's preferences."></textarea>
+    <div class="row">
+      <button id="go">Evaluate idea</button>
+      <button id="clear" class="ghost">Clear</button>
+      <span class="hint">Ctrl/⌘ + Enter to run.</span>
+    </div>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="hist" id="histWrap" style="display:none">
+    <h2>Recent evaluations</h2>
+    <div id="hist"></div>
+  </div>
+
+  <div class="foot">Scores: 8–10 strong · 5–7 workable with caveats · 1–4 weak / likely killer. Uses OpenRouter; no live web search.</div>
+</div>
+
+<script>
+const KKEY = "bie_openrouter_key";
+const HKEY = "bie_history_v1";
+const MKEY = "bie_openrouter_model";
+const DEFAULT_MODEL = "openai/gpt-4o-mini";
+const out = document.getElementById("out");
+const ideaEl = document.getElementById("idea");
+const goBtn = document.getElementById("go");
+const keyEl = document.getElementById("key");
+const modelEl = document.getElementById("model");
+const keyStatus = document.getElementById("keystatus");
+
+function getKey(){ try { return localStorage.getItem(KKEY) || ""; } catch(e){ return ""; } }
+function getModel(){ const v = (modelEl && modelEl.value.trim()) || ""; if (v) return v; try { return localStorage.getItem(MKEY) || DEFAULT_MODEL; } catch(e){ return DEFAULT_MODEL; } }
+function saveModel(){ try { localStorage.setItem(MKEY, getModel()); } catch(e){} }
+function setKeyStatus(){ const k = getKey(); keyStatus.innerHTML = k ? '<span class="ok">✓ key saved</span>' : ''; if (k && !keyEl.value) keyEl.placeholder = "•••••• (saved)"; }
+document.getElementById("savekey").onclick = () => {
+  const v = keyEl.value.trim();
+  if (!v) { keyEl.focus(); return; }
+  try { localStorage.setItem(KKEY, v); } catch(e){}
+  keyEl.value = ""; setKeyStatus();
+};
+
+function loadHist(){ try { return JSON.parse(localStorage.getItem(HKEY) || "[]"); } catch(e){ return []; } }
+function saveHist(h){ try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0,12))); } catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function scoreColor(n){ n=Number(n)||0; if(n>=8) return {bg:"#e5f4ea",fg:"#1a7f37"}; if(n>=5) return {bg:"#fdf3e2",fg:"#a15c07"}; return {bg:"#fdeceb",fg:"#b42318"}; }
+
+function render(ev){
+  const call=(ev.call||"REWORK").toUpperCase();
+  const roles=ev.roles||[];
+  const rows=roles.map(r=>{const c=scoreColor(r.score);return `<tr><td>${esc(r.name)}</td><td><span class="pill" style="background:${c.bg};color:${c.fg}">${esc(r.score)}</span></td><td>${esc(r.verdict)}</td></tr>`;}).join("");
+  const cards=roles.map(r=>{const c=scoreColor(r.score);return `<div class="role"><div class="rh"><b>${esc(r.name)}</b><span class="pill" style="background:${c.bg};color:${c.fg}">${esc(r.score)}/10</span></div><p>${esc(r.analysis)}</p><div class="rv">${esc(r.verdict)}</div></div>`;}).join("");
+  const recs=(ev.recommendation||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+  out.innerHTML=`<div class="card result"><p class="idea-stmt">${esc(ev.idea)}</p>${ev.assumptions?`<p class="assum">Assumptions: ${esc(ev.assumptions)}</p>`:""}<div class="verdline"><span class="badge ${call}">${call}</span><span class="composite">Composite <b>${esc(ev.composite)}</b> / 10</span></div><p>${esc(ev.reasoning)}</p>${ev.convergence?`<div class="conv"><b>Convergence:</b> ${esc(ev.convergence)}</div>`:""}<table><thead><tr><th>Dimension</th><th>Score</th><th>One-line verdict</th></tr></thead><tbody>${rows}</tbody></table>${cards}${recs?`<h3>Recommendation</h3><ul class="recs">${recs}</ul>`:""}</div>`;
+  out.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderHist(){
+  const h=loadHist(); const wrap=document.getElementById("histWrap"); const list=document.getElementById("hist");
+  if(!h.length){ wrap.style.display="none"; return; }
+  wrap.style.display="block";
+  list.innerHTML=h.map((ev,i)=>{const call=(ev.call||"REWORK").toUpperCase();return `<div class="hitem" data-i="${i}"><span class="ht">${esc(ev.idea)}</span><span><span class="composite">${esc(ev.composite)}</span> <span class="badge ${call}" style="font-size:12px;padding:3px 10px">${call}</span></span></div>`;}).join("");
+  [...list.querySelectorAll(".hitem")].forEach(el=>{ el.onclick=()=>render(loadHist()[+el.dataset.i]); });
+}
+
+function extractJSON(raw){
+  let s=(raw||"").trim().replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  const a=s.indexOf("{"), b=s.lastIndexOf("}");
+  if(a>=0&&b>a) s=s.slice(a,b+1);
+  return JSON.parse(s);
+}
+
+const PROMPT = (idea) => `You are the Orchestrator of a business-idea evaluation panel. Evaluate the idea below through four specialist roles, each judging ONLY its own dimension and giving an integer score 1-10:
+- Market: demand (real/recurring vs fad), competition, timing, size.
+- Pricing: price the market bears, sensitivity, a concrete tier idea, margin room.
+- Positioning: differentiation vs incumbents, moat/switching cost, sharpest wedge, biggest risk.
+- Revenue: revenue-model shape, unit economics, the cost line that decides profitability, path to first revenue, churn.
+Then synthesize: composite = average of the four (one decimal), a call of GO, REWORK, or KILL with one-line reasoning, a convergence point (a shared risk/lever multiple roles flagged), and if REWORK/KILL a short list of specific changes that move it toward GO.
+Be specific, quantitative, and honest, not a cheerleader. Infer obvious context and state brief assumptions.
+Return ONLY valid minified JSON, no markdown, with this exact shape:
+{"idea":"<one-sentence restatement>","assumptions":"<short>","composite":<number>,"call":"GO|REWORK|KILL","reasoning":"<one line>","convergence":"<one line>","roles":[{"name":"Market","score":<int>,"analysis":"<2-3 sentences with numbers>","verdict":"<one line>"},{"name":"Pricing","score":<int>,"analysis":"...","verdict":"..."},{"name":"Positioning","score":<int>,"analysis":"...","verdict":"..."},{"name":"Revenue","score":<int>,"analysis":"...","verdict":"..."}],"recommendation":["<change 1>","<change 2>"]}
+IDEA: ${idea}`;
+
+async function evaluate(){
+  const idea=ideaEl.value.trim();
+  if(!idea){ ideaEl.focus(); return; }
+  const key=getKey();
+  if(!key){ out.innerHTML=`<div class="card"><div class="err">Add your OpenRouter API key above and click “Save key” first.</div></div>`; keyEl.focus(); return; }
+  const model=getModel(); saveModel();
+  goBtn.disabled=true; goBtn.textContent="Evaluating…";
+  out.innerHTML=`<div class="card" style="text-align:center;color:#667085"><span class="spin"></span>Running the four-role panel…</div>`;
+  try {
+    const r=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+key,
+        "content-type":"application/json",
+        "X-Title":"Business Idea Evaluator"
+      },
+      body:JSON.stringify({ model:model, max_tokens:1600, messages:[{role:"user",content:PROMPT(idea.slice(0,2000))}] })
+    });
+    const data=await r.json();
+    if(!r.ok){ throw new Error((data && data.error && data.error.message) || ("HTTP "+r.status)); }
+    const text=(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+    const ev=extractJSON(text);
+    if(!ev.roles) throw new Error("Malformed response.");
+    ev.idea=ev.idea||idea;
+    render(ev);
+    const h=loadHist(); h.unshift(ev); saveHist(h); renderHist();
+  } catch(e){
+    out.innerHTML=`<div class="card"><div class="err">Sorry — couldn't generate the evaluation (${esc(e.message)}). Check your API key and try again.</div></div>`;
+  } finally {
+    goBtn.disabled=false; goBtn.textContent="Evaluate idea";
+  }
+}
+
+goBtn.onclick=evaluate;
+document.getElementById("clear").onclick=()=>{ ideaEl.value=""; out.innerHTML=""; ideaEl.focus(); };
+ideaEl.addEventListener("keydown", e=>{ if((e.metaKey||e.ctrlKey)&&e.key==="Enter") evaluate(); });
+setKeyStatus(); try { modelEl.value = localStorage.getItem(MKEY) || DEFAULT_MODEL; } catch(e){ modelEl.value = DEFAULT_MODEL; } renderHist();
+</script>
+</body>
+</html>
